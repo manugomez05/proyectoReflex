@@ -1,57 +1,53 @@
 import reflex as rx
+from paginaReflex import style
+from paginaReflex.state import State
 
-class State(rx.State):
-    count: int=0
+def qa(question: str, answer: str) -> rx.Component:
+    return rx.box(
+        rx.box(
+            rx.text(question, style=style.question_style),
+            text_align="right",
+        ),
+        rx.box(
+            rx.text(answer, style=style.answer_style),
+            text_align="left",
+        ),
+        margin_y="1em",
+        width="100%",
+    )
 
-    def increment(self):
-        self.count+=1
-    
-    def incrementx2(self):
-        self.count+=2
-
-    def decrement(self):
-        self.count-=1
-    
-    def decrementx2(self):
-        self.count-=2
-
-def index():
-    return rx.vstack(
-        rx.hstack(
-            rx.button(
-                "Decrement",
-                color_scheme="ruby",
-                border_radius="1em",
-                on_click=State.decrement    
-            ),
-            rx.heading(State.count, font_size="2em"),
-            rx.button(
-                "Increment",
-                color_scheme="grass",
-                border_radius="1em",
-                on_click=State.increment
-            ),
-            rx.vstack(
-                rx.hstack(
-            rx.button(
-                "Decrement x2",
-                color_scheme="ruby",
-                border_radius="1em",
-                on_click=State.decrementx2
-            ),
-             rx.heading(State.count, font_size="2em"),
-            rx.button(
-                "Increment x2",
-                color_scheme="grass",
-                border_radius="1em",
-                on_double_click=State.incrementx2
-            )
-            )
-        )
+def chat()-> rx.Component:
+    return rx.box(
+        rx.foreach(
+            State.chat_history,
+            lambda messages: qa(messages[0], messages[1]),
         )
     )
 
 
-app=rx.App()
+def action_bar() -> rx.Component:
+    return rx.hstack(
+        rx.input(
+            value=State.question,
+            placeholder="Ask a question",
+            on_change=State.set_question,
+            style=style.input_style,
+        ),
+        rx.button(
+            "Ask",
+            on_click=State.answer,
+            style=style.button_style,
+        ),
+    )
+
+def index() -> rx.Component:
+    return rx.container(
+        chat(),
+        action_bar(),
+    )
+
+
+# Add state and page to the app.
+app = rx.App()
 app.add_page(index)
 app._compile()
